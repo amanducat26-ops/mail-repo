@@ -23,6 +23,18 @@ function buildPreview(body: string): string {
   return body.replace(/<[^>]*>/g, " ").trim().slice(0, 120) || "(No content)";
 }
 
+function buildReplyQuote(mail: Mail): string {
+  const header = `On ${mail.createdAt}, ${mail.sender.name} &lt;${mail.sender.email}&gt; wrote:`;
+  return `<p><br></p><div class="gmail-quote"><div class="gmail-quote-header">${header}</div><blockquote class="gmail-quote-body">${mail.body}</blockquote></div>`;
+}
+
+function buildForwardQuote(mail: Mail): string {
+  const to = mail.recipients?.to?.join(", ") ?? "";
+  const cc = mail.recipients?.cc?.join(", ") ?? "";
+  const ccRow = cc ? `<tr><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368">Cc:</td><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368">${cc}</td></tr>` : "";
+  return `<p><br></p><div class="fwd-header"><p style="margin:0 0 8px;font-family:Arial,sans-serif;font-size:13px;font-weight:bold;color="#202124">---------- Forwarded message ----------</p><table style="border-collapse:collapse;margin-bottom:12px"><tr><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368;width:60px">From:</td><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368">${mail.sender.name} &lt;${mail.sender.email}&gt;</td></tr><tr><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368">Date:</td><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368">${mail.createdAt}</td></tr><tr><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368">Subject:</td><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368">${mail.subject}</td></tr><tr><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368">To:</td><td style="padding:2px 0;font-family:Arial,sans-serif;font-size:13px;color:#5f6368">${to}</td></tr>${ccRow}</table><hr style="border:none;border-top:1px solid #e0e0e0;margin:0 0 12px">${mail.body}</div>`;
+}
+
 export function MailProvider({ children }: { children: ReactNode }) {
   const [mails, setMails] = useState<Mail[]>(initialMailData.mails);
   const [recipients] = useState<Recipient[]>(initialMailData.recipients);
@@ -63,11 +75,7 @@ export function MailProvider({ children }: { children: ReactNode }) {
       openCompose({
         to: [mail.sender.email],
         subject: mail.subject.startsWith("Re:") ? mail.subject : `Re: ${mail.subject}`,
-        body: `
-          <p></p>
-          <p>On ${mail.createdAt}, ${mail.sender.name} wrote:</p>
-          <blockquote>${mail.body}</blockquote>
-        `,
+        body: buildReplyQuote(mail),
       });
     },
     [openCompose]
@@ -85,11 +93,7 @@ export function MailProvider({ children }: { children: ReactNode }) {
         cc: [],
         bcc,
         subject: mail.subject.startsWith("Re:") ? mail.subject : `Re: ${mail.subject}`,
-        body: `
-          <p></p>
-          <p>On ${mail.createdAt}, ${mail.sender.name} wrote:</p>
-          <blockquote>${mail.body}</blockquote>
-        `,
+        body: buildReplyQuote(mail),
       });
     },
     [openCompose]
@@ -99,16 +103,7 @@ export function MailProvider({ children }: { children: ReactNode }) {
     (mail: Mail) => {
       openCompose({
         subject: mail.subject.startsWith("Fwd:") ? mail.subject : `Fwd: ${mail.subject}`,
-        body: `
-          <p></p>
-          <p>---------- Forwarded message ----------</p>
-          <p>
-            <strong>From:</strong> ${mail.sender.name} &lt;${mail.sender.email}&gt;
-          </p>
-          <p><strong>Subject:</strong> ${mail.subject}</p>
-          <hr />
-          ${mail.body}
-        `,
+        body: buildForwardQuote(mail),
         attachments: mail.attachments ?? [],
       });
     },

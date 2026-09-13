@@ -7,3 +7,46 @@
 body {
   font-family: 'Inter', system-ui, sans-serif;
 }
+
+.gmail-quote {
+  margin-top: 16px;
+  padding-left: 12px;
+  border-left: 2px solid #e0e0e0;
+}
+
+.gmail-quote-header {
+  font-size: 13px;
+  color: #5f6368;
+  margin-bottom: 8px;
+}
+
+.gmail-quote-body {
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: #5f6368;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.gmail-quote-body p {
+  margin: 0 0 8px;
+}
+
+.gmail-quote-body blockquote {
+  margin: 0 0 8px;
+  padding-left: 12px;
+  border-left: 1px solid #e0e0e0;
+}
+
+.fwd-header {
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  color: #202124;
+}
+
+.fwd-header hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 0 0 12px;
+}
