@@ -1,0 +1,9 @@
+@import "jodit/es2021/jodit.min.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+}
