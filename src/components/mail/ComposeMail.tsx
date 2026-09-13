@@ -38,7 +38,7 @@ const joditConfig: JoditEditorProps["config"] = {
   askBeforePasteFromWord: false,
   defaultActionOnPasteFromWord: "insert_clear_html",
   placeholder: "Write your message...",
-  disablePlugins: ["stat", "poweredBy"],
+  disablePlugins: ["stat", "poweredBy", "copy-format"],
   uploader: { insertImageAsBase64URI: true },
 };
 

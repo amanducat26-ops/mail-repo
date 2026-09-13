@@ -11,6 +11,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['lucide-react', 'jodit', 'jodit-react'],
+    include: ['jodit', 'jodit-react'],
+    exclude: ['lucide-react'],
   },
 });
