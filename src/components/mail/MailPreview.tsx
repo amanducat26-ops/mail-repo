@@ -35,6 +35,8 @@ export default function MailPreview() {
       {previewAttachment && (
         <AttachmentViewer
           attachment={previewAttachment}
+          attachments={selectedMail.attachments ?? []}
+          onSelect={setPreviewAttachment}
           onClose={() => setPreviewAttachment(null)}
         />
       )}
