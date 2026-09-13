@@ -1,11 +1,19 @@
+import { Suspense, lazy, useMemo } from "react";
 import { useMail } from "@/context/MailContext";
-import ComposeMail from "@/components/mail/ComposeMail";
+
+const ComposeMail = lazy(() => import("@/components/mail/ComposeMail"));
 
 export default function Drafts() {
   const { mails, mode, openCompose } = useMail();
-  const drafts = mails.filter((mail) => mail.folder === "draft");
+  const drafts = useMemo(() => mails.filter((mail) => mail.folder === "draft"), [mails]);
 
-  if (mode === "composing") return <ComposeMail />;
+  if (mode === "composing") {
+    return (
+      <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-slate-400">Loading editor…</div>}>
+        <ComposeMail />
+      </Suspense>
+    );
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col">

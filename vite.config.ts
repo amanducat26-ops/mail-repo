@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -13,5 +12,17 @@ export default defineConfig({
   optimizeDeps: {
     include: ['jodit', 'jodit-react'],
     exclude: ['lucide-react'],
+  },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-jodit': ['jodit', 'jodit-react'],
+          'vendor-icons': ['lucide-react'],
+        },
+      },
+    },
   },
 });

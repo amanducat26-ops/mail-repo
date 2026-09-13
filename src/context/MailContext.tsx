@@ -3,6 +3,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -16,6 +17,12 @@ const MailContext = createContext<MailContextValue | null>(null);
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const SENDER = { name: "Amit Singh", email: "amit.singh@navy.gov.in" } as const;
+
+function buildPreview(body: string): string {
+  return body.replace(/<[^>]*>/g, " ").trim().slice(0, 120) || "(No content)";
+}
+
 export function MailProvider({ children }: { children: ReactNode }) {
   const [mails, setMails] = useState<Mail[]>(initialMailData.mails);
   const [recipients] = useState<Recipient[]>(initialMailData.recipients);
@@ -26,6 +33,8 @@ export function MailProvider({ children }: { children: ReactNode }) {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isSending, setIsSending] = useState(false);
+
+  const busyRef = useRef({ isSaving: false, isSending: false });
 
   const openMail = useCallback((mail: Mail) => {
     setSelectedMail(mail);
@@ -108,17 +117,18 @@ export function MailProvider({ children }: { children: ReactNode }) {
 
   const saveDraft = useCallback(
     async (formData: ComposeData): Promise<Mail | undefined> => {
-      if (isSaving || isSending) return;
+      if (busyRef.current.isSaving || busyRef.current.isSending) return;
+      busyRef.current.isSaving = true;
       setIsSaving(true);
       try {
         await wait(700);
         const draft: Mail = {
           id: formData.id ?? createMailId(),
           folder: "draft",
-          sender: { name: "Amit Singh", email: "amit.singh@navy.gov.in" },
+          sender: SENDER,
           recipients: { to: formData.to, cc: formData.cc, bcc: formData.bcc },
           subject: formData.subject,
-          preview: formData.body?.replace(/<[^>]*>/g, " ").trim().slice(0, 120) || "(No content)",
+          preview: buildPreview(formData.body),
           body: formData.body,
           createdAt: "Just now",
           isRead: true,
@@ -136,25 +146,27 @@ export function MailProvider({ children }: { children: ReactNode }) {
         toast.error("Unable to save draft");
         throw new Error("Unable to save draft");
       } finally {
+        busyRef.current.isSaving = false;
         setIsSaving(false);
       }
     },
-    [isSaving, isSending]
+    []
   );
 
   const sendMail = useCallback(
     async (formData: ComposeData): Promise<void> => {
-      if (isSending || isSaving) return;
+      if (busyRef.current.isSending || busyRef.current.isSaving) return;
+      busyRef.current.isSending = true;
       setIsSending(true);
       try {
         await wait(900);
         const sentMail: Mail = {
           id: formData.id ?? createMailId(),
           folder: "outbox",
-          sender: { name: "Amit Singh", email: "amit.singh@navy.gov.in" },
+          sender: SENDER,
           recipients: { to: formData.to, cc: formData.cc, bcc: formData.bcc },
           subject: formData.subject,
-          preview: formData.body?.replace(/<[^>]*>/g, " ").trim().slice(0, 120) || "(No content)",
+          preview: buildPreview(formData.body),
           body: formData.body,
           createdAt: "Just now",
           isRead: true,
@@ -169,18 +181,19 @@ export function MailProvider({ children }: { children: ReactNode }) {
         toast.error("Unable to send mail");
         throw new Error("Unable to send mail");
       } finally {
+        busyRef.current.isSending = false;
         setIsSending(false);
       }
     },
-    [isSending, isSaving]
+    []
   );
 
   const discardCompose = useCallback(() => {
-    if (isSaving || isSending) return;
+    if (busyRef.current.isSaving || busyRef.current.isSending) return;
     setComposeData(null);
     setMode("empty");
     toast.success("Draft discarded");
-  }, [isSaving, isSending]);
+  }, []);
 
   const addAttachments = useCallback((files: FileList) => {
     const attachments = Array.from(files).map((file) => ({

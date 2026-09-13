@@ -1,8 +1,10 @@
+import { Suspense, lazy, useMemo } from "react";
 import { useMail } from "@/context/MailContext";
 import MailList from "@/components/mail/MailList";
 import MailPreview from "@/components/mail/MailPreview";
-import ComposeMail from "@/components/mail/ComposeMail";
 import type { MailFolder } from "@/types/mail";
+
+const ComposeMail = lazy(() => import("@/components/mail/ComposeMail"));
 
 export default function SimpleFolder({
   folder,
@@ -12,9 +14,15 @@ export default function SimpleFolder({
   title: string;
 }) {
   const { mails, mode } = useMail();
-  const folderMails = mails.filter((mail) => mail.folder === folder);
+  const folderMails = useMemo(() => mails.filter((mail) => mail.folder === folder), [mails, folder]);
 
-  if (mode === "composing") return <ComposeMail />;
+  if (mode === "composing") {
+    return (
+      <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-slate-400">Loading editor…</div>}>
+        <ComposeMail />
+      </Suspense>
+    );
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col">

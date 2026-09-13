@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Paperclip, Star } from "lucide-react";
 import { useMail } from "@/context/MailContext";
 import { getInitials } from "@/utils/mail";
@@ -28,7 +29,7 @@ export default function MailList({ mails }: { mails: Mail[] }) {
   );
 }
 
-function MailListItem({
+const MailListItem = memo(function MailListItem({
   mail,
   selected,
   onClick,
@@ -85,4 +86,4 @@ function MailListItem({
       </div>
     </button>
   );
-}
+});

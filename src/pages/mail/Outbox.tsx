@@ -1,13 +1,21 @@
+import { Suspense, lazy, useMemo } from "react";
 import { useMail } from "@/context/MailContext";
 import MailList from "@/components/mail/MailList";
 import MailPreview from "@/components/mail/MailPreview";
-import ComposeMail from "@/components/mail/ComposeMail";
+
+const ComposeMail = lazy(() => import("@/components/mail/ComposeMail"));
 
 export default function Outbox() {
   const { mails, mode } = useMail();
-  const outbox = mails.filter((mail) => mail.folder === "outbox");
+  const outbox = useMemo(() => mails.filter((mail) => mail.folder === "outbox"), [mails]);
 
-  if (mode === "composing") return <ComposeMail />;
+  if (mode === "composing") {
+    return (
+      <Suspense fallback={<div className="flex h-full items-center justify-center text-sm text-slate-400">Loading editor…</div>}>
+        <ComposeMail />
+      </Suspense>
+    );
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col">
